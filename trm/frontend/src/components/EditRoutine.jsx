@@ -53,7 +53,13 @@ const EditRoutine = () => {
         let processedValue = value;
 
         if (name === 'duration') {
-            processedValue = parseInt(value) * 60000;
+            const minutes = parseInt(value);
+            if (minutes <= 0) {
+                // If the input is zero or negative, set it to 1 minute
+                processedValue = 60000; // 1 minute in milliseconds
+            } else {
+                processedValue = minutes * 60000;
+            }
         } else if (name === 'entry_type') {
             processedValue = parseInt(value);
         } else if (name === 'training_pack_code') {
@@ -196,7 +202,7 @@ const EditRoutine = () => {
                     <input
                         type="number"
                         name="duration"
-                        value={Math.round(newEntry.duration / 60000)}
+                        value={newEntry.duration ? Math.max(1, Math.round(newEntry.duration / 60000)) : 1}
                         onChange={handleEntryChange}
                         placeholder="Duration (minutes)"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -288,7 +294,11 @@ const EditRoutine = () => {
                                     <input
                                         type="number"
                                         name="duration"
-                                        value={editingEntry.duration ? Math.round(editingEntry.duration / 60000) : 0}
+                                        value={
+                                            editingEntry.duration
+                                                ? Math.max(1, Math.round(editingEntry.duration / 60000))
+                                                : 1
+                                        }
                                         onChange={(e) => handleEntryChange(e, false)}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
                                     />
