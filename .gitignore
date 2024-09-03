@@ -37,6 +37,7 @@ pip-log.txt
 pip-delete-this-directory.txt
 trm/__pycache__/
 __pycache__/
+staticfiles/
 
 # Unit test / coverage reports
 htmlcov/

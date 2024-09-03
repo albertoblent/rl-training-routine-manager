@@ -13,8 +13,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # This is the directory where collectstatic will collect static files for deployment
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "trm/static"),
+    os.path.join(BASE_DIR, "trm", "static"),
 ]
+
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-u#ak_a%iykf2xog2xd47^cmc1znu2_z(la1wg^2fdh!q+^otzu")
@@ -160,3 +161,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+print(f"DEBUG: BASE_DIR = {BASE_DIR}")
+print(f"DEBUG: STATIC_ROOT = {STATIC_ROOT}")
+print(f"DEBUG: STATICFILES_DIRS = {STATICFILES_DIRS}")
