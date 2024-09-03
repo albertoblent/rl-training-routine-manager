@@ -76,6 +76,49 @@ const TrainingRoutineManager = () => {
         }
     };
 
+    const exportRoutine = () => {
+        const exportData = {
+            Duration: routine.duration,
+            Entries: routine.entries.map((entry) => ({
+                Duration: entry.duration,
+                Name: entry.name,
+                Notes: entry.notes || '',
+                TimeMode: 0,
+                TrainingPackCode: entry.training_pack_code || '',
+                Type: entry.entry_type,
+                Variance: {
+                    AllowMirror: '',
+                    EnableTraining: '',
+                    LimitBoost: '',
+                    PlayerVelocity: '',
+                    Shuffle: '',
+                    UseDefaultSettings: true,
+                    VarCarLoc: '',
+                    VarCarRot: '',
+                    VarLoc: '',
+                    VarLocZ: '',
+                    VarRot: '',
+                    VarSpeed: '',
+                    VarSpin: '',
+                },
+                WorkshopMapPath: entry.entry_type === 3 ? `${entry.workshop_map_id}\\${entry.workshop_map_file}` : '',
+            })),
+            Id: crypto.randomUUID(),
+            Name: routine.name,
+            ReadOnly: false,
+        };
+
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${routine.name.replace(/\s+/g, '_')}_routine.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div>
             <h1>Create Training Routine</h1>
@@ -152,6 +195,7 @@ const TrainingRoutineManager = () => {
                 ))}
             </ul>
             <button onClick={saveRoutine}>Save Routine</button>
+            <button onClick={exportRoutine}>Export Routine</button>
         </div>
     );
 };
