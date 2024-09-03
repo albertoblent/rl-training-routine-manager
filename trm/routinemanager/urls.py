@@ -3,7 +3,7 @@ from django.urls import path
 
 from .views import (TrainingRoutineCreateView, TrainingRoutineDeleteView,
                     TrainingRoutineDetailView, TrainingRoutineExportView,
-                    TrainingRoutineListView)
+                    TrainingRoutineListView, TrainingRoutineUpdateView)
 
 urlpatterns = [
     path("routines/", TrainingRoutineListView.as_view(), name="routine-list"),
@@ -24,5 +24,10 @@ urlpatterns = [
         "routines/<uuid:pk>/delete/",
         TrainingRoutineDeleteView.as_view(),
         name="routine-delete",
+    ),
+    path(
+        "routines/<uuid:pk>/update/",
+        TrainingRoutineUpdateView.as_view(),
+        name="routine-update",
     ),
 ]
