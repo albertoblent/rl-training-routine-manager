@@ -35,6 +35,8 @@ MANIFEST
 *.spec
 pip-log.txt
 pip-delete-this-directory.txt
+trm/__pycache__/
+__pycache__/
 
 # Unit test / coverage reports
 htmlcov/
