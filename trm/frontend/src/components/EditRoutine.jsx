@@ -130,11 +130,11 @@ const EditRoutine = () => {
                         onChange={handleEntryChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                        <option value={1}>Freeplay</option>
-                        <option value={2}>Custom Training Pack</option>
-                        <option value={3}>Workshop Map</option>
+                        <option value="1">Freeplay</option>
+                        <option value="2">Custom Training Pack</option>
+                        <option value="3">Workshop Map</option>
                     </select>
-                    {newEntry.entry_type === 2 && (
+                    {newEntry.entry_type === '2' && (
                         <input
                             type="text"
                             name="training_pack_code"
@@ -144,7 +144,7 @@ const EditRoutine = () => {
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     )}
-                    {newEntry.entry_type === 3 && (
+                    {newEntry.entry_type === '3' && (
                         <>
                             <input
                                 type="text"
