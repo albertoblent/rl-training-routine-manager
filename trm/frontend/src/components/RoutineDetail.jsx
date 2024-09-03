@@ -1,11 +1,13 @@
-// src/components/RoutineDetail.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { Download, Trash2, Edit2, ArrowLeft, Clock, Package, Map } from 'lucide-react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import Modal from './Modal'; // Make sure to import the Modal component
 
 const RoutineDetail = () => {
     const [routine, setRoutine] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalContent, setModalContent] = useState({ title: '', message: '' });
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -15,12 +17,25 @@ const RoutineDetail = () => {
             setRoutine(response.data);
         } catch (error) {
             console.error('Error fetching routine:', error);
+            showModal('Error', 'Failed to fetch routine details. Please try again.');
         }
     }, [id]);
 
     useEffect(() => {
         fetchRoutine();
     }, [fetchRoutine]);
+
+    const showModal = (title, message, isConfirmation = false) => {
+        setModalContent({ title, message, isConfirmation });
+        setIsModalOpen(true);
+    };
+
+    const handleModalClose = () => {
+        setIsModalOpen(false);
+        if (modalContent.title === 'Success' && modalContent.message === 'Routine deleted successfully') {
+            navigate('/');
+        }
+    };
 
     const exportRoutine = async () => {
         if (!routine) return;
@@ -73,20 +88,21 @@ const RoutineDetail = () => {
             URL.revokeObjectURL(url);
         } catch (error) {
             console.error('Error exporting routine:', error);
-            alert('Error exporting routine. Please try again.');
+            showModal('Error', 'Failed to export routine. Please try again.');
         }
     };
 
     const deleteRoutine = async () => {
-        if (window.confirm('Are you sure you want to delete this routine?')) {
-            try {
-                await axios.delete(`/api/routines/${id}/delete/`);
-                alert('Routine deleted successfully');
-                navigate('/'); // Redirect to the routine list
-            } catch (error) {
-                console.error('Error deleting routine:', error);
-                alert('Error deleting routine. Please try again.');
-            }
+        showModal('Confirm Deletion', 'Are you sure you want to delete this routine?', true);
+    };
+
+    const confirmDelete = async () => {
+        try {
+            await axios.delete(`/api/routines/${id}/delete/`);
+            showModal('Success', 'Routine deleted successfully');
+        } catch (error) {
+            console.error('Error deleting routine:', error);
+            showModal('Error', 'Failed to delete routine. Please try again.');
         }
     };
 
@@ -166,6 +182,26 @@ const RoutineDetail = () => {
                     ))}
                 </ul>
             </div>
+
+            <Modal isOpen={isModalOpen} onClose={handleModalClose} title={modalContent.title}>
+                <p>{modalContent.message}</p>
+                <div className="mt-4 flex justify-end space-x-2">
+                    {modalContent.isConfirmation && (
+                        <button
+                            onClick={() => setIsModalOpen(false)}
+                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                    )}
+                    <button
+                        onClick={modalContent.isConfirmation ? confirmDelete : handleModalClose}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                    >
+                        {modalContent.isConfirmation ? 'Confirm' : 'OK'}
+                    </button>
+                </div>
+            </Modal>
         </div>
     );
 };

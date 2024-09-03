@@ -2,9 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { PlusCircle, Download, Trash2, Edit2 } from 'lucide-react';
+import Modal from './Modal'; // Make sure to import the Modal component
 
-const HomePage = () => {
+const RoutineList = () => {
     const [routines, setRoutines] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalContent, setModalContent] = useState({ title: '', message: '' });
+    const [routineToDelete, setRoutineToDelete] = useState(null);
 
     useEffect(() => {
         fetchRoutines();
@@ -16,6 +20,7 @@ const HomePage = () => {
             setRoutines(response.data);
         } catch (error) {
             console.error('Error fetching routines:', error);
+            showModal('Error', 'Failed to fetch routines. Please try again.');
         }
     };
 
@@ -68,20 +73,38 @@ const HomePage = () => {
             URL.revokeObjectURL(url);
         } catch (error) {
             console.error('Error exporting routine:', error);
-            alert('Error exporting routine. Please try again.');
+            showModal('Error', 'Failed to export routine. Please try again.');
         }
     };
 
-    const deleteRoutine = async (id) => {
-        if (window.confirm('Are you sure you want to delete this routine?')) {
+    const showDeleteConfirmation = (routine) => {
+        setRoutineToDelete(routine);
+        showModal('Confirm Deletion', `Are you sure you want to delete the routine "${routine.name}"?`, true);
+    };
+
+    const deleteRoutine = async () => {
+        if (routineToDelete) {
             try {
-                await axios.delete(`/api/routines/${id}/delete/`);
-                alert('Routine deleted successfully');
+                await axios.delete(`/api/routines/${routineToDelete.id}/delete/`);
+                showModal('Success', 'Routine deleted successfully');
                 fetchRoutines(); // Refresh the list
             } catch (error) {
                 console.error('Error deleting routine:', error);
-                alert('Error deleting routine. Please try again.');
+                showModal('Error', 'Failed to delete routine. Please try again.');
             }
+            setRoutineToDelete(null);
+        }
+    };
+
+    const showModal = (title, message, isConfirmation = false) => {
+        setModalContent({ title, message, isConfirmation });
+        setIsModalOpen(true);
+    };
+
+    const handleModalClose = () => {
+        setIsModalOpen(false);
+        if (modalContent.isConfirmation) {
+            deleteRoutine();
         }
     };
 
@@ -119,7 +142,7 @@ const HomePage = () => {
                                 <Download size={20} />
                             </button>
                             <button
-                                onClick={() => deleteRoutine(routine.id)}
+                                onClick={() => showDeleteConfirmation(routine)}
                                 className="p-2 text-gray-600 hover:text-red-500 transition-colors"
                                 title="Delete"
                             >
@@ -136,8 +159,27 @@ const HomePage = () => {
                     </li>
                 ))}
             </ul>
+            <Modal isOpen={isModalOpen} onClose={handleModalClose} title={modalContent.title}>
+                <p>{modalContent.message}</p>
+                <div className="mt-4 flex justify-end space-x-2">
+                    {modalContent.isConfirmation && (
+                        <button
+                            onClick={() => setIsModalOpen(false)}
+                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                    )}
+                    <button
+                        onClick={handleModalClose}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                    >
+                        {modalContent.isConfirmation ? 'Confirm' : 'OK'}
+                    </button>
+                </div>
+            </Modal>
         </div>
     );
 };
 
-export default HomePage;
+export default RoutineList;
