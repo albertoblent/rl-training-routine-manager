@@ -99,7 +99,7 @@ const RoutineDetail = () => {
     const confirmDelete = async () => {
         try {
             await axios.delete(`/api/routines/${id}/delete/`);
-            showModal('Success', 'Routine deleted successfully');
+            // showModal('Success', 'Routine deleted successfully');
         } catch (error) {
             console.error('Error deleting routine:', error);
             showModal('Error', 'Failed to delete routine. Please try again.');

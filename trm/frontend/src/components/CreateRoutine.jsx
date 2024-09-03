@@ -39,7 +39,13 @@ const CreateRoutine = () => {
         let processedValue = value;
 
         if (name === 'duration') {
-            processedValue = parseInt(value) * 60000;
+            const minutes = parseInt(value);
+            if (minutes <= 0) {
+                // If the input is zero or negative, set it to 1 minute
+                processedValue = 60000; // 1 minute in milliseconds
+            } else {
+                processedValue = minutes * 60000;
+            }
         } else if (name === 'entry_type') {
             processedValue = parseInt(value);
         } else if (name === 'training_pack_code') {
@@ -159,9 +165,10 @@ const CreateRoutine = () => {
                     <input
                         type="number"
                         name="duration"
-                        value={Math.round(newEntry.duration / 60000)}
+                        value={newEntry.duration ? Math.max(1, Math.round(newEntry.duration / 60000)) : 1}
                         onChange={handleEntryChange}
                         placeholder="Duration (minutes)"
+                        min="1"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <select
@@ -272,13 +279,6 @@ const CreateRoutine = () => {
                 >
                     Save Routine
                 </button>
-                {/* <button
-                    onClick={exportRoutine}
-                    className="px-6 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center"
-                >
-                    <Download className="mr-2" size={20} />
-                    Export Routine
-                </button> */}
             </div>
 
             <Modal isOpen={isModalOpen} onClose={handleModalClose} title={modalContent.title}>
