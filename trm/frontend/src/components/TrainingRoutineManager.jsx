@@ -1,8 +1,10 @@
 // src/components/TrainingRoutineManager.js
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const TrainingRoutineManager = () => {
+    const navigate = useNavigate();
     const [routine, setRoutine] = useState({
         name: '',
         duration: 0,
@@ -69,7 +71,7 @@ const TrainingRoutineManager = () => {
             });
             console.log('Routine saved:', response.data);
             alert('Routine saved successfully!');
-            setRoutine({ name: '', duration: 0, entries: [] });
+            navigate('/'); // Redirect to the routine list
         } catch (error) {
             console.error('Error saving routine:', error.response ? error.response.data : error.message);
             alert('Error saving routine. Please try again.');
