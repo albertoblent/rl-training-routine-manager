@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Clock, PlusCircle, Trash2, AlertCircle, Download } from 'lucide-react';
-import Modal from './Modal'; // Make sure to import the Modal component
+import { ArrowLeft, Clock, PlusCircle, Trash2, AlertCircle } from 'lucide-react';
+import Modal from './Modal';
 
 const CreateRoutine = () => {
     const navigate = useNavigate();
