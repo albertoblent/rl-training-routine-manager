@@ -8,14 +8,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = "RENDER" not in os.environ
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-
-# This is the directory where collectstatic will collect static files for deployment
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "trm", "static"),
-]
-
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-u#ak_a%iykf2xog2xd47^cmc1znu2_z(la1wg^2fdh!q+^otzu")
