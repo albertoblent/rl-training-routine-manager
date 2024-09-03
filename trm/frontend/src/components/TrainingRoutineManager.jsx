@@ -1,5 +1,5 @@
 // src/components/TrainingRoutineManager.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const TrainingRoutineManager = () => {
@@ -19,12 +19,24 @@ const TrainingRoutineManager = () => {
         notes: '',
     });
 
+    useEffect(() => {
+        const totalDuration = routine.entries.reduce((sum, entry) => sum + entry.duration, 0);
+        setRoutine((prev) => ({ ...prev, duration: totalDuration }));
+    }, [routine.entries]);
+
     const handleRoutineChange = (e) => {
         setRoutine({ ...routine, [e.target.name]: e.target.value });
     };
 
     const handleEntryChange = (e) => {
-        setNewEntry({ ...newEntry, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        if (name === 'duration') {
+            setNewEntry({ ...newEntry, [name]: parseInt(value) * 60000 });
+        } else if (name === 'entry_type') {
+            setNewEntry({ ...newEntry, [name]: parseInt(value) });
+        } else {
+            setNewEntry({ ...newEntry, [name]: value });
+        }
     };
 
     const addEntry = () => {
@@ -56,12 +68,10 @@ const TrainingRoutineManager = () => {
                 },
             });
             console.log('Routine saved:', response.data);
-            // Handle success (e.g., show a success message, clear the form)
             alert('Routine saved successfully!');
             setRoutine({ name: '', duration: 0, entries: [] });
         } catch (error) {
             console.error('Error saving routine:', error.response ? error.response.data : error.message);
-            // Handle error (e.g., show an error message)
             alert('Error saving routine. Please try again.');
         }
     };
@@ -77,13 +87,7 @@ const TrainingRoutineManager = () => {
                     onChange={handleRoutineChange}
                     placeholder="Routine Name"
                 />
-                <input
-                    type="number"
-                    name="duration"
-                    value={routine.duration}
-                    onChange={handleRoutineChange}
-                    placeholder="Total Duration (ms)"
-                />
+                <p>Total Duration: {Math.round(routine.duration / 60000)} minutes</p>
             </div>
             <h2>Add Entry</h2>
             <div>
@@ -97,9 +101,9 @@ const TrainingRoutineManager = () => {
                 <input
                     type="number"
                     name="duration"
-                    value={newEntry.duration}
+                    value={Math.round(newEntry.duration / 60000)}
                     onChange={handleEntryChange}
-                    placeholder="Duration (ms)"
+                    placeholder="Duration (minutes)"
                 />
                 <select name="entry_type" value={newEntry.entry_type} onChange={handleEntryChange}>
                     <option value={1}>Freeplay</option>
@@ -140,7 +144,9 @@ const TrainingRoutineManager = () => {
             <ul>
                 {routine.entries.map((entry, index) => (
                     <li key={index}>
-                        {entry.name} - {entry.duration}ms
+                        {entry.name} - {Math.round(entry.duration / 60000)} minutes
+                        {entry.entry_type === 2 && ` - Pack: ${entry.training_pack_code}`}
+                        {entry.entry_type === 3 && ` - Map: ${entry.workshop_map_id}/${entry.workshop_map_file}`}
                         <button onClick={() => removeEntry(index)}>Remove</button>
                     </li>
                 ))}
