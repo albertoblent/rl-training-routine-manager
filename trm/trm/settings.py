@@ -1,16 +1,23 @@
+import dj_database_url
 import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+STATIC_URL = "trm/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "trm/staticfiles")
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "trm/static"),
+]
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-u#ak_a%iykf2xog2xd47^cmc1znu2_z(la1wg^2fdh!q+^otzu')
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-u#ak_a%iykf2xog2xd47^cmc1znu2_z(la1wg^2fdh!q+^otzu")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
+DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".onrender.com"]
 
 
 # Application definition
@@ -36,19 +43,17 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
 ]
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = (
-    True  # For development only, configure more strictly for production
-)
+CORS_ALLOW_ALL_ORIGINS = True  # For development only, configure more strictly for production
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
     "DELETE",
@@ -94,12 +99,7 @@ WSGI_APPLICATION = "trm.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+DATABASES = {"default": dj_database_url.config(default="sqlite:///db.sqlite3", conn_max_age=600)}
 
 
 # Password validation
@@ -132,12 +132,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
