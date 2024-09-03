@@ -3,6 +3,7 @@ import { Download, Trash2, Edit2, ArrowLeft, Clock, Package, Map } from 'lucide-
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import Modal from './Modal'; // Make sure to import the Modal component
+import config from '../config';
 
 const RoutineDetail = () => {
     const [routine, setRoutine] = useState(null);
@@ -13,7 +14,7 @@ const RoutineDetail = () => {
 
     const fetchRoutine = useCallback(async () => {
         try {
-            const response = await axios.get(`/api/routines/${id}/`);
+            const response = await axios.get(`${config.apiUrl}/api/routines/${id}/`);
             setRoutine(response.data);
         } catch (error) {
             console.error('Error fetching routine:', error);
@@ -41,7 +42,7 @@ const RoutineDetail = () => {
         if (!routine) return;
 
         try {
-            const response = await axios.get(`/api/routines/${id}/export/`);
+            const response = await axios.get(`${config.apiUrl}/api/routines/${id}/export/`);
             const exportData = response.data;
 
             // Format the data for RL Training Timer
@@ -98,7 +99,7 @@ const RoutineDetail = () => {
 
     const confirmDelete = async () => {
         try {
-            await axios.delete(`/api/routines/${id}/delete/`);
+            await axios.delete(`${config.apiUrl}/api/routines/${id}/delete/`);
             // showModal('Success', 'Routine deleted successfully');
         } catch (error) {
             console.error('Error deleting routine:', error);

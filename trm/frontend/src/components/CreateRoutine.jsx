@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, Clock, PlusCircle, Trash2, AlertCircle } from 'lucide-react';
 import Modal from './Modal';
+import config from '../config';
 
 const CreateRoutine = () => {
     const navigate = useNavigate();
@@ -97,7 +98,7 @@ const CreateRoutine = () => {
 
     const saveRoutine = async () => {
         try {
-            const response = await axios.post('/api/routines/create/', routine, {
+            const response = await axios.post(`${config.apiUrl}/api/routines/create/`, routine, {
                 headers: {
                     'Content-Type': 'application/json',
                 },

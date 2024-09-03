@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Modal from './Modal';
 import axios from 'axios';
+import config from '../config';
 import { ArrowLeft, Clock, PlusCircle, Trash2, AlertCircle, Edit, Save, X } from 'lucide-react';
 
 const EditRoutine = () => {
@@ -30,7 +31,7 @@ const EditRoutine = () => {
     useEffect(() => {
         const fetchRoutine = async () => {
             try {
-                const response = await axios.get(`/api/routines/${id}/`);
+                const response = await axios.get(`${config.apiUrl}/api/routines/${id}/`);
                 setRoutine(response.data);
             } catch (error) {
                 console.error('Error fetching routine:', error);
@@ -140,7 +141,7 @@ const EditRoutine = () => {
 
     const updateRoutine = async () => {
         try {
-            await axios.put(`/api/routines/${id}/update/`, routine);
+            await axios.put(`${config.apiUrl}/api/routines/${id}/update/`, routine);
             setModalContent({
                 title: 'Success',
                 message: 'Routine updated successfully!',
