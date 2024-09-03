@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { PlusCircle, Download, Trash2, Edit2 } from 'lucide-react';
@@ -10,11 +10,7 @@ const RoutineList = () => {
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
     const [routineToDelete, setRoutineToDelete] = useState(null);
 
-    useEffect(() => {
-        fetchRoutines();
-    }, []);
-
-    const fetchRoutines = async () => {
+    const fetchRoutines = useCallback(async () => {
         try {
             const response = await axios.get('/api/routines/');
             setRoutines(response.data);
@@ -22,7 +18,11 @@ const RoutineList = () => {
             console.error('Error fetching routines:', error);
             showModal('Error', 'Failed to fetch routines. Please try again.');
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        fetchRoutines();
+    }, [fetchRoutines]);
 
     const exportRoutine = async (routine) => {
         try {
