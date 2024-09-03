@@ -1,8 +1,9 @@
 // src/components/EditRoutine.js
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import Modal from './Modal';
 import axios from 'axios';
-import { ArrowLeft, Clock, PlusCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Clock, PlusCircle, Trash2, AlertCircle } from 'lucide-react';
 
 const EditRoutine = () => {
     const [routine, setRoutine] = useState({
@@ -19,6 +20,9 @@ const EditRoutine = () => {
         workshop_map_file: '',
         notes: '',
     });
+    const [trainingPackError, setTrainingPackError] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalContent, setModalContent] = useState({ title: '', message: '' });
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -44,11 +48,39 @@ const EditRoutine = () => {
     };
 
     const handleEntryChange = (e) => {
-        const value = e.target.name === 'duration' ? parseInt(e.target.value) * 60000 : e.target.value;
-        setNewEntry({ ...newEntry, [e.target.name]: value });
+        const { name, value } = e.target;
+        let processedValue = value;
+
+        if (name === 'duration') {
+            processedValue = parseInt(value) * 60000;
+        } else if (name === 'entry_type') {
+            processedValue = parseInt(value);
+        } else if (name === 'training_pack_code') {
+            processedValue = value.toUpperCase();
+            validateTrainingPackCode(processedValue);
+        }
+
+        setNewEntry({ ...newEntry, [name]: processedValue });
+    };
+
+    const validateTrainingPackCode = (code) => {
+        const regex = /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+        if (code && !regex.test(code)) {
+            setTrainingPackError('Invalid format. Use XXXX-XXXX-XXXX-XXXX');
+        } else {
+            setTrainingPackError('');
+        }
     };
 
     const addEntry = () => {
+        if (newEntry.entry_type === 2 && trainingPackError) {
+            setModalContent({
+                title: 'Invalid Training Pack Code',
+                message: 'Please correct the training pack code before adding the entry.',
+            });
+            setIsModalOpen(true);
+            return;
+        }
         setRoutine({
             ...routine,
             entries: [...routine.entries, { ...newEntry, order: routine.entries.length }],
@@ -62,6 +94,7 @@ const EditRoutine = () => {
             workshop_map_file: '',
             notes: '',
         });
+        setTrainingPackError('');
     };
 
     const removeEntry = (index) => {
@@ -72,11 +105,25 @@ const EditRoutine = () => {
     const updateRoutine = async () => {
         try {
             await axios.put(`/api/routines/${id}/update/`, routine);
-            alert('Routine updated successfully!');
-            navigate(`/routine/${id}`);
+            setModalContent({
+                title: 'Success',
+                message: 'Routine updated successfully!',
+            });
+            setIsModalOpen(true);
         } catch (error) {
             console.error('Error updating routine:', error);
-            alert('Error updating routine. Please try again.');
+            setModalContent({
+                title: 'Error',
+                message: 'Error updating routine. Please try again.',
+            });
+            setIsModalOpen(true);
+        }
+    };
+
+    const handleModalClose = () => {
+        setIsModalOpen(false);
+        if (modalContent.title === 'Success') {
+            navigate(`/routine/${id}`);
         }
     };
 
@@ -130,21 +177,31 @@ const EditRoutine = () => {
                         onChange={handleEntryChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                        <option value="1">Freeplay</option>
-                        <option value="2">Custom Training Pack</option>
-                        <option value="3">Workshop Map</option>
+                        <option value={1}>Freeplay</option>
+                        <option value={2}>Custom Training Pack</option>
+                        <option value={3}>Workshop Map</option>
                     </select>
-                    {newEntry.entry_type === '2' && (
-                        <input
-                            type="text"
-                            name="training_pack_code"
-                            value={newEntry.training_pack_code}
-                            onChange={handleEntryChange}
-                            placeholder="Training Pack Code"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
+                    {newEntry.entry_type === 2 && (
+                        <div>
+                            <input
+                                type="text"
+                                name="training_pack_code"
+                                value={newEntry.training_pack_code}
+                                onChange={handleEntryChange}
+                                placeholder="Training Pack Code (e.g., XXXX-XXXX-XXXX-XXXX)"
+                                className={`w-full px-3 py-2 border ${
+                                    trainingPackError ? 'border-red-500' : 'border-gray-300'
+                                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                            />
+                            {trainingPackError && (
+                                <p className="mt-1 text-red-500 text-sm flex items-center">
+                                    <AlertCircle className="mr-1" size={16} />
+                                    {trainingPackError}
+                                </p>
+                            )}
+                        </div>
                     )}
-                    {newEntry.entry_type === '3' && (
+                    {newEntry.entry_type === 3 && (
                         <>
                             <input
                                 type="text"
@@ -229,6 +286,16 @@ const EditRoutine = () => {
                     Cancel
                 </Link>
             </div>
+
+            <Modal isOpen={isModalOpen} onClose={handleModalClose} title={modalContent.title}>
+                <p>{modalContent.message}</p>
+                <button
+                    onClick={handleModalClose}
+                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                >
+                    OK
+                </button>
+            </Modal>
         </div>
     );
 };
