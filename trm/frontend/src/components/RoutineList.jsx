@@ -7,17 +7,17 @@ const RoutineList = () => {
     const [routines, setRoutines] = useState([]);
 
     useEffect(() => {
-        const fetchRoutines = async () => {
-            try {
-                const response = await axios.get('/api/routines/');
-                setRoutines(response.data);
-            } catch (error) {
-                console.error('Error fetching routines:', error);
-            }
-        };
-
         fetchRoutines();
     }, []);
+
+    const fetchRoutines = async () => {
+        try {
+            const response = await axios.get('/api/routines/');
+            setRoutines(response.data);
+        } catch (error) {
+            console.error('Error fetching routines:', error);
+        }
+    };
 
     const exportRoutine = async (routine) => {
         try {
@@ -72,6 +72,19 @@ const RoutineList = () => {
         }
     };
 
+    const deleteRoutine = async (id) => {
+        if (window.confirm('Are you sure you want to delete this routine?')) {
+            try {
+                await axios.delete(`/api/routines/${id}/delete/`);
+                alert('Routine deleted successfully');
+                fetchRoutines(); // Refresh the list
+            } catch (error) {
+                console.error('Error deleting routine:', error);
+                alert('Error deleting routine. Please try again.');
+            }
+        }
+    };
+
     return (
         <div>
             <h1>Training Routines</h1>
@@ -82,6 +95,7 @@ const RoutineList = () => {
                         <Link to={`/routine/${routine.id}`}>{routine.name}</Link> -
                         {Math.round(routine.duration / 60000)} minutes
                         <button onClick={() => exportRoutine(routine)}>Export</button>
+                        <button onClick={() => deleteRoutine(routine.id)}>Delete</button>
                     </li>
                 ))}
             </ul>
