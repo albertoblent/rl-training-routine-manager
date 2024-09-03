@@ -5,8 +5,13 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-STATIC_URL = "trm/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "trm/staticfiles")
+DEBUG = "RENDER" not in os.environ
+
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+# This is the directory where collectstatic will collect static files for deployment
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "trm/static"),
 ]
@@ -14,14 +19,8 @@ STATICFILES_DIRS = [
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-u#ak_a%iykf2xog2xd47^cmc1znu2_z(la1wg^2fdh!q+^otzu")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = "RENDER" not in os.environ
-
-if not DEBUG:  # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
-    STATIC_URL = '/static/'
-    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-    # Enable the WhiteNoise storage backend, which compresses static files to reduce disk use
-    # and renames the files with unique names for each version to support long-term caching
+if not DEBUG:
+    # Enable WhiteNoise's GZip compression of static assets.
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".onrender.com"]
