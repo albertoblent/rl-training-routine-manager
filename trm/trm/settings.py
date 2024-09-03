@@ -1,6 +1,7 @@
-import dj_database_url
 import os
 from pathlib import Path
+
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -12,7 +13,10 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-u#ak_a%iykf2xog2xd47^cmc1znu2_z(la1wg^2fdh!q+^otzu")
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-u#ak_a%iykf2xog2xd47^cmc1znu2_z(la1wg^2fdh!q+^otzu",
+)
 
 if not DEBUG:
     # Enable WhiteNoise's GZip compression of static assets.
@@ -59,7 +63,9 @@ MIDDLEWARE = [
 ]
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True  # For development only, configure more strictly for production
+CORS_ALLOW_ALL_ORIGINS = (
+    True  # For development only, configure more strictly for production
+)
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
     "DELETE",
@@ -159,7 +165,3 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-
-print(f"DEBUG: BASE_DIR = {BASE_DIR}")
-print(f"DEBUG: STATIC_ROOT = {STATIC_ROOT}")
