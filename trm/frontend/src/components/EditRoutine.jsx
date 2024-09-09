@@ -55,12 +55,7 @@ const EditRoutine = () => {
 
         if (name === 'duration') {
             const minutes = parseInt(value);
-            if (minutes <= 0) {
-                // If the input is zero or negative, set it to 1 minute
-                processedValue = 60000; // 1 minute in milliseconds
-            } else {
-                processedValue = minutes * 60000;
-            }
+            processedValue = minutes <= 0 ? 60000 : minutes * 60000;
         } else if (name === 'entry_type') {
             processedValue = parseInt(value);
         } else if (name === 'training_pack_code') {
@@ -77,11 +72,7 @@ const EditRoutine = () => {
 
     const validateTrainingPackCode = (code) => {
         const regex = /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
-        if (code && !regex.test(code)) {
-            setTrainingPackError('Invalid format. Use XXXX-XXXX-XXXX-XXXX');
-        } else {
-            setTrainingPackError('');
-        }
+        setTrainingPackError(code && !regex.test(code) ? 'Invalid format. Use XXXX-XXXX-XXXX-XXXX' : '');
     };
 
     const addEntry = () => {
@@ -116,6 +107,9 @@ const EditRoutine = () => {
 
     const startEditingEntry = (entry, index) => {
         setEditingEntry({ ...entry, index });
+        if (entry.entry_type === 2) {
+            validateTrainingPackCode(entry.training_pack_code);
+        }
     };
 
     const cancelEditingEntry = () => {
@@ -303,16 +297,35 @@ const EditRoutine = () => {
                                         onChange={(e) => handleEntryChange(e, false)}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
                                     />
+                                    <select
+                                        name="entry_type"
+                                        value={editingEntry.entry_type}
+                                        onChange={(e) => handleEntryChange(e, false)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+                                    >
+                                        <option value={1}>Freeplay</option>
+                                        <option value={2}>Custom Training Pack</option>
+                                        <option value={3}>Workshop Map</option>
+                                    </select>
                                     {editingEntry.entry_type === 2 && (
-                                        <input
-                                            type="text"
-                                            name="training_pack_code"
-                                            value={editingEntry.training_pack_code}
-                                            onChange={(e) => handleEntryChange(e, false)}
-                                            className={`w-full px-3 py-2 border ${
-                                                trainingPackError ? 'border-red-500' : 'border-gray-300'
-                                            } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2`}
-                                        />
+                                        <div>
+                                            <input
+                                                type="text"
+                                                name="training_pack_code"
+                                                value={editingEntry.training_pack_code}
+                                                onChange={(e) => handleEntryChange(e, false)}
+                                                placeholder="Training Pack Code (e.g., XXXX-XXXX-XXXX-XXXX)"
+                                                className={`w-full px-3 py-2 border ${
+                                                    trainingPackError ? 'border-red-500' : 'border-gray-300'
+                                                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2`}
+                                            />
+                                            {trainingPackError && (
+                                                <p className="mt-1 text-red-500 text-sm flex items-center">
+                                                    <AlertCircle className="mr-1" size={16} />
+                                                    {trainingPackError}
+                                                </p>
+                                            )}
+                                        </div>
                                     )}
                                     {editingEntry.entry_type === 3 && (
                                         <>
@@ -321,6 +334,7 @@ const EditRoutine = () => {
                                                 name="workshop_map_id"
                                                 value={editingEntry.workshop_map_id}
                                                 onChange={(e) => handleEntryChange(e, false)}
+                                                placeholder="Workshop Map ID"
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
                                             />
                                             <input
@@ -328,10 +342,18 @@ const EditRoutine = () => {
                                                 name="workshop_map_file"
                                                 value={editingEntry.workshop_map_file}
                                                 onChange={(e) => handleEntryChange(e, false)}
+                                                placeholder="Workshop Map File"
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
                                             />
                                         </>
                                     )}
+                                    <textarea
+                                        name="notes"
+                                        value={editingEntry.notes}
+                                        onChange={(e) => handleEntryChange(e, false)}
+                                        placeholder="Notes"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-24 mb-2"
+                                    />
                                     <div className="flex justify-end space-x-2">
                                         <button
                                             onClick={saveEditingEntry}
