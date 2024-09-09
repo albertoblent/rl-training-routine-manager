@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Download, Trash2, Edit2, ArrowLeft, Clock, Package, Map, Copy } from 'lucide-react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -10,19 +10,22 @@ const useFetchRoutine = (id) => {
     const [routine, setRoutine] = useState(null);
     const [error, setError] = useState(null);
 
-    const fetchRoutine = useCallback(async () => {
-        if (id === 'create') return; // Don't fetch if we're on the create page
-        try {
-            const response = await axios.get(`${config.apiUrl}/api/routines/${id}/`);
-            setRoutine(response.data);
-        } catch (error) {
-            console.error('Error fetching routine:', error);
-            console.error('Error details:', error.response ? error.response.data : 'No response data');
-            setError(`Failed to fetch routine details. Error: ${error.message}`);
-        }
+    useEffect(() => {
+        const fetchRoutine = async () => {
+            if (id === 'create') return;
+            try {
+                const response = await axios.get(`${config.apiUrl}/api/routines/${id}/`);
+                setRoutine(response.data);
+            } catch (error) {
+                console.error('Error fetching routine:', error);
+                setError(`Failed to fetch routine details. Error: ${error.message}`);
+            }
+        };
+
+        fetchRoutine();
     }, [id]);
 
-    return { routine, error, fetchRoutine };
+    return { routine, error };
 };
 
 const RoutineDetail = () => {
@@ -31,11 +34,7 @@ const RoutineDetail = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
-    const { routine, error, fetchRoutine } = useFetchRoutine(id);
-
-    React.useEffect(() => {
-        fetchRoutine();
-    }, [fetchRoutine]);
+    const { routine, error } = useFetchRoutine(id);
 
     const showModal = (title, message, isConfirmation = false) => {
         setModalContent({ title, message, isConfirmation });
