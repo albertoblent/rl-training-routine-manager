@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, Clock, PlusCircle, Trash2, AlertCircle } from 'lucide-react';
 import Modal from './Modal';
@@ -7,11 +7,13 @@ import config from '../config';
 
 const CreateRoutine = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [routine, setRoutine] = useState({
         name: '',
         duration: 0,
         entries: [],
     });
+    const routineSet = useRef(false);
     const [newEntry, setNewEntry] = useState({
         name: '',
         duration: 0,
@@ -25,6 +27,13 @@ const CreateRoutine = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
     const [newRoutineId, setNewRoutineId] = useState(null);
+
+    useEffect(() => {
+        if (location.state && location.state.clonedRoutine && !routineSet.current) {
+            setRoutine(location.state.clonedRoutine);
+            routineSet.current = true;
+        }
+    }, [location.state]);
 
     useEffect(() => {
         const totalDuration = routine.entries.reduce((sum, entry) => sum + entry.duration, 0);
@@ -98,23 +107,25 @@ const CreateRoutine = () => {
 
     const saveRoutine = async () => {
         try {
+            console.log('Saving routine:', routine);
             const response = await axios.post(`${config.apiUrl}/api/routines/create/`, routine, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
-            console.log('Routine saved:', response.data);
-            setNewRoutineId(response.data.id); // Assuming the API returns the new routine's ID
+            console.log('Routine saved, server response:', response.data);
+            setNewRoutineId(response.data.id);
             setModalContent({
                 title: 'Success',
                 message: 'Routine saved successfully!',
             });
             setIsModalOpen(true);
         } catch (error) {
-            console.error('Error saving routine:', error.response ? error.response.data : error.message);
+            console.error('Error saving routine:', error);
+            console.error('Error details:', error.response ? error.response.data : 'No response data');
             setModalContent({
                 title: 'Error',
-                message: 'Error saving routine. Please try again.',
+                message: `Error saving routine: ${error.message}. Please try again.`,
             });
             setIsModalOpen(true);
         }
@@ -135,7 +146,11 @@ const CreateRoutine = () => {
             </Link>
 
             <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-                <h1 className="text-3xl font-bold mb-6">Create Training Routine</h1>
+                <h1 className="text-3xl font-bold mb-6">
+                    {location.state && location.state.clonedRoutine
+                        ? 'Clone Training Routine'
+                        : 'Create Training Routine'}
+                </h1>
                 <div className="mb-4">
                     <input
                         type="text"

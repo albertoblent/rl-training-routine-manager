@@ -11,7 +11,7 @@ function App() {
             <div className="App bg-gray-100 min-h-screen">
                 <Routes>
                     <Route path="/" element={<RoutineList />} />
-                    <Route path="/create" element={<CreateRoutine />} />
+                    <Route path="/routine/create" element={<CreateRoutine />} />
                     <Route path="/routine/:id" element={<RoutineDetail />} />
                     <Route path="/routine/:id/edit" element={<EditRoutine />} />
                 </Routes>

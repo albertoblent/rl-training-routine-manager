@@ -113,7 +113,7 @@ const RoutineList = () => {
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold mb-6">Training Routines</h1>
             <Link
-                to="/create"
+                to="/routine/create"
                 className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors mb-6"
             >
                 <PlusCircle className="mr-2" size={20} />

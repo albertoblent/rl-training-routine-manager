@@ -1,28 +1,39 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Download, Trash2, Edit2, ArrowLeft, Clock, Package, Map } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { Download, Trash2, Edit2, ArrowLeft, Clock, Package, Map, Copy } from 'lucide-react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import Modal from './Modal'; // Make sure to import the Modal component
+import Modal from './Modal';
 import config from '../config';
 
-const RoutineDetail = () => {
+// Custom hook for fetching routine
+const useFetchRoutine = (id) => {
     const [routine, setRoutine] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalContent, setModalContent] = useState({ title: '', message: '' });
-    const { id } = useParams();
-    const navigate = useNavigate();
+    const [error, setError] = useState(null);
 
     const fetchRoutine = useCallback(async () => {
+        if (id === 'create') return; // Don't fetch if we're on the create page
         try {
             const response = await axios.get(`${config.apiUrl}/api/routines/${id}/`);
             setRoutine(response.data);
         } catch (error) {
             console.error('Error fetching routine:', error);
-            showModal('Error', 'Failed to fetch routine details. Please try again.');
+            console.error('Error details:', error.response ? error.response.data : 'No response data');
+            setError(`Failed to fetch routine details. Error: ${error.message}`);
         }
     }, [id]);
 
-    useEffect(() => {
+    return { routine, error, fetchRoutine };
+};
+
+const RoutineDetail = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalContent, setModalContent] = useState({ title: '', message: '' });
+
+    const { routine, error, fetchRoutine } = useFetchRoutine(id);
+
+    React.useEffect(() => {
         fetchRoutine();
     }, [fetchRoutine]);
 
@@ -93,6 +104,21 @@ const RoutineDetail = () => {
         }
     };
 
+    const cloneRoutine = () => {
+        if (!routine) return;
+
+        const clonedRoutine = {
+            ...routine,
+            name: `Copy of ${routine.name}`,
+            id: null,
+            entries: routine.entries.map((entry) => ({
+                ...entry,
+                id: null,
+            })),
+        };
+        navigate('/routine/create', { state: { clonedRoutine } });
+    };
+
     const deleteRoutine = async () => {
         showModal('Confirm Deletion', 'Are you sure you want to delete this routine?', true);
     };
@@ -107,12 +133,17 @@ const RoutineDetail = () => {
         }
     };
 
-    if (!routine)
+    if (error) {
+        return <div className="text-red-500">{error}</div>;
+    }
+
+    if (!routine && id !== 'create') {
         return (
             <div className="flex justify-center items-center h-screen">
                 <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
             </div>
         );
+    }
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -150,6 +181,13 @@ const RoutineDetail = () => {
                         <Edit2 className="mr-2" size={20} />
                         Edit
                     </Link>
+                    <button
+                        onClick={cloneRoutine}
+                        className="flex items-center px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors"
+                    >
+                        <Copy className="mr-2" size={20} />
+                        Clone
+                    </button>
                 </div>
             </div>
 
