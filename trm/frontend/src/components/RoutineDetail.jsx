@@ -2,40 +2,39 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Trash2, Edit2, ArrowLeft, Clock, Package, Map, Copy } from 'lucide-react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import useApi from '../hooks/useApi';
 import Modal from './Modal';
-import config from '../config';
 
 // Custom hook for fetching routine
 const useFetchRoutine = (id) => {
+    const { get, loading, error } = useApi();
     const [routine, setRoutine] = useState(null);
-    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchRoutine = async () => {
             if (id === 'create') return;
             try {
-                const response = await axios.get(`${config.apiUrl}/api/routines/${id}/`);
-                setRoutine(response.data);
+                const data = await get(`/api/routines/${id}/`);
+                setRoutine(data);
             } catch (error) {
-                console.error('Error fetching routine:', error);
-                setError(`Failed to fetch routine details. Error: ${error.message}`);
+                // Error is handled by useApi hook
             }
         };
 
         fetchRoutine();
-    }, [id]);
+    }, [id, get]);
 
-    return { routine, error };
+    return { routine, loading, error };
 };
 
 const RoutineDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { get, del } = useApi();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
-    const { routine, error } = useFetchRoutine(id);
+    const { routine, loading, error } = useFetchRoutine(id);
 
     const showModal = (title, message, isConfirmation = false) => {
         setModalContent({ title, message, isConfirmation });
@@ -53,8 +52,7 @@ const RoutineDetail = () => {
         if (!routine) return;
 
         try {
-            const response = await axios.get(`${config.apiUrl}/api/routines/${id}/export/`);
-            const exportData = response.data;
+            const exportData = await get(`/api/routines/${id}/export/`);
 
             // Format the data for RL Training Timer
             const formattedData = {
@@ -99,7 +97,6 @@ const RoutineDetail = () => {
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
         } catch (error) {
-            console.error('Error exporting routine:', error);
             showModal('Error', 'Failed to export routine. Please try again.');
         }
     };
@@ -119,30 +116,33 @@ const RoutineDetail = () => {
         navigate('/routine/create', { state: { clonedRoutine } });
     };
 
-    const deleteRoutine = async () => {
+    const deleteRoutine = () => {
         showModal('Confirm Deletion', 'Are you sure you want to delete this routine?', true);
     };
 
     const confirmDelete = async () => {
         try {
-            await axios.delete(`${config.apiUrl}/api/routines/${id}/delete/`);
-            // showModal('Success', 'Routine deleted successfully');
+            await del(`/api/routines/${id}/delete/`);
+            showModal('Success', 'Routine deleted successfully');
         } catch (error) {
-            console.error('Error deleting routine:', error);
             showModal('Error', 'Failed to delete routine. Please try again.');
         }
     };
 
-    if (error) {
-        return <div className="text-red-500">{error}</div>;
-    }
-
-    if (!routine && id !== 'create') {
+    if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">
                 <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
             </div>
         );
+    }
+
+    if (error) {
+        return <div className="text-red-500">Error: {error}</div>;
+    }
+
+    if (!routine && id !== 'create') {
+        return <div className="text-red-500">Routine not found</div>;
     }
 
     return (
