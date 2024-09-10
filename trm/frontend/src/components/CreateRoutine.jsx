@@ -1,13 +1,13 @@
 // src/components/CreateRoutine.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import useApi from '../hooks/useApi';
 import { ArrowLeft, Clock, PlusCircle, Trash2, AlertCircle } from 'lucide-react';
 import Modal from './Modal';
-import config from '../config';
 
 const CreateRoutine = () => {
     const navigate = useNavigate();
+    const { post, loading, error } = useApi();
     const location = useLocation();
     const [routine, setRoutine] = useState({
         name: '',
@@ -17,7 +17,7 @@ const CreateRoutine = () => {
     const routineSet = useRef(false);
     const [newEntry, setNewEntry] = useState({
         name: '',
-        duration: 0,
+        duration: 60000, // Set initial duration to 1 minute (60000 milliseconds)
         entry_type: 1,
         training_pack_code: '',
         workshop_map_id: '',
@@ -50,13 +50,8 @@ const CreateRoutine = () => {
         let processedValue = value;
 
         if (name === 'duration') {
-            const minutes = parseInt(value);
-            if (minutes <= 0) {
-                // If the input is zero or negative, set it to 1 minute
-                processedValue = 60000; // 1 minute in milliseconds
-            } else {
-                processedValue = minutes * 60000;
-            }
+            const minutes = Math.max(1, parseInt(value)); // Ensure minimum of 1 minute
+            processedValue = minutes * 60000; // Convert to milliseconds
         } else if (name === 'entry_type') {
             processedValue = parseInt(value);
         } else if (name === 'training_pack_code') {
@@ -85,13 +80,14 @@ const CreateRoutine = () => {
             setIsModalOpen(true);
             return;
         }
+
         setRoutine({
             ...routine,
             entries: [...routine.entries, { ...newEntry, order: routine.entries.length }],
         });
         setNewEntry({
             name: '',
-            duration: 0,
+            duration: 60000, // Reset to 1 minute
             entry_type: 1,
             training_pack_code: '',
             workshop_map_id: '',
@@ -109,13 +105,9 @@ const CreateRoutine = () => {
     const saveRoutine = async () => {
         try {
             console.log('Saving routine:', routine);
-            const response = await axios.post(`${config.apiUrl}/api/routines/create/`, routine, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            console.log('Routine saved, server response:', response.data);
-            setNewRoutineId(response.data.id);
+            const response = await post('/api/routines/create/', routine);
+            console.log('Routine saved, server response:', response);
+            setNewRoutineId(response.id);
             setModalContent({
                 title: 'Success',
                 message: 'Routine saved successfully!',
@@ -123,10 +115,9 @@ const CreateRoutine = () => {
             setIsModalOpen(true);
         } catch (error) {
             console.error('Error saving routine:', error);
-            console.error('Error details:', error.response ? error.response.data : 'No response data');
             setModalContent({
                 title: 'Error',
-                message: `Error saving routine: ${error.message}. Please try again.`,
+                message: `Error saving routine: ${error}. Please try again.`,
             });
             setIsModalOpen(true);
         }
@@ -138,6 +129,9 @@ const CreateRoutine = () => {
             navigate(`/routine/${newRoutineId}`);
         }
     };
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -182,7 +176,7 @@ const CreateRoutine = () => {
                     <input
                         type="number"
                         name="duration"
-                        value={newEntry.duration ? Math.max(1, Math.round(newEntry.duration / 60000)) : 1}
+                        value={Math.max(1, Math.round(newEntry.duration / 60000))}
                         onChange={handleEntryChange}
                         placeholder="Duration (minutes)"
                         min="1"
