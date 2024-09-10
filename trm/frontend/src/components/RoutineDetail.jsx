@@ -1,3 +1,4 @@
+// src/components/RoutineDetail.jsx
 import React, { useState, useEffect } from 'react';
 import { Download, Trash2, Edit2, ArrowLeft, Clock, Package, Map, Copy } from 'lucide-react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
