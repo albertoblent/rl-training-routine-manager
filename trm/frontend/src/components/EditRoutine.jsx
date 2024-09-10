@@ -2,11 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Modal from './Modal';
-import axios from 'axios';
-import config from '../config';
+import useApi from '../hooks/useApi';
 import { ArrowLeft, Clock, PlusCircle, Trash2, AlertCircle, Edit, Save, X } from 'lucide-react';
 
 const EditRoutine = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { get, put, loading, error } = useApi();
+
     const [routine, setRoutine] = useState({
         name: '',
         duration: 0,
@@ -14,7 +17,7 @@ const EditRoutine = () => {
     });
     const [newEntry, setNewEntry] = useState({
         name: '',
-        duration: 0,
+        duration: 60000, // Set initial duration to 1 minute
         entry_type: 1,
         training_pack_code: '',
         workshop_map_id: '',
@@ -25,20 +28,18 @@ const EditRoutine = () => {
     const [trainingPackError, setTrainingPackError] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
-    const { id } = useParams();
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchRoutine = async () => {
             try {
-                const response = await axios.get(`${config.apiUrl}/api/routines/${id}/`);
-                setRoutine(response.data);
+                const data = await get(`/api/routines/${id}/`);
+                setRoutine(data);
             } catch (error) {
-                console.error('Error fetching routine:', error);
+                showModal('Error', 'Failed to fetch routine. Please try again.');
             }
         };
         fetchRoutine();
-    }, [id]);
+    }, [id, get]);
 
     useEffect(() => {
         const totalDuration = routine.entries.reduce((sum, entry) => sum + entry.duration, 0);
@@ -54,8 +55,8 @@ const EditRoutine = () => {
         let processedValue = value;
 
         if (name === 'duration') {
-            const minutes = parseInt(value);
-            processedValue = minutes <= 0 ? 60000 : minutes * 60000;
+            const minutes = Math.max(1, parseInt(value));
+            processedValue = minutes * 60000;
         } else if (name === 'entry_type') {
             processedValue = parseInt(value);
         } else if (name === 'training_pack_code') {
@@ -77,11 +78,7 @@ const EditRoutine = () => {
 
     const addEntry = () => {
         if (newEntry.entry_type === 2 && trainingPackError) {
-            setModalContent({
-                title: 'Invalid Training Pack Code',
-                message: 'Please correct the training pack code before adding the entry.',
-            });
-            setIsModalOpen(true);
+            showModal('Invalid Training Pack Code', 'Please correct the training pack code before adding the entry.');
             return;
         }
         setRoutine({
@@ -90,7 +87,7 @@ const EditRoutine = () => {
         });
         setNewEntry({
             name: '',
-            duration: 0,
+            duration: 60000,
             entry_type: 1,
             training_pack_code: '',
             workshop_map_id: '',
@@ -119,11 +116,7 @@ const EditRoutine = () => {
 
     const saveEditingEntry = () => {
         if (editingEntry.entry_type === 2 && trainingPackError) {
-            setModalContent({
-                title: 'Invalid Training Pack Code',
-                message: 'Please correct the training pack code before saving the entry.',
-            });
-            setIsModalOpen(true);
+            showModal('Invalid Training Pack Code', 'Please correct the training pack code before saving the entry.');
             return;
         }
         const updatedEntries = [...routine.entries];
@@ -135,20 +128,16 @@ const EditRoutine = () => {
 
     const updateRoutine = async () => {
         try {
-            await axios.put(`${config.apiUrl}/api/routines/${id}/update/`, routine);
-            setModalContent({
-                title: 'Success',
-                message: 'Routine updated successfully!',
-            });
-            setIsModalOpen(true);
+            await put(`/api/routines/${id}/update/`, routine);
+            showModal('Success', 'Routine updated successfully!');
         } catch (error) {
-            console.error('Error updating routine:', error);
-            setModalContent({
-                title: 'Error',
-                message: 'Error updating routine. Please try again.',
-            });
-            setIsModalOpen(true);
+            showModal('Error', 'Error updating routine. Please try again.');
         }
+    };
+
+    const showModal = (title, message) => {
+        setModalContent({ title, message });
+        setIsModalOpen(true);
     };
 
     const handleModalClose = () => {
@@ -157,6 +146,9 @@ const EditRoutine = () => {
             navigate(`/routine/${id}`);
         }
     };
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
 
     return (
         <div className="container mx-auto px-4 py-8">
