@@ -1,26 +1,25 @@
 // src/components/RoutineList.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import useApi from '../hooks/useApi';
 import { PlusCircle, Download, Trash2, Edit2 } from 'lucide-react';
-import Modal from './Modal'; // Make sure to import the Modal component
-import config from '../config';
+import Modal from './Modal';
 
 const RoutineList = () => {
     const [routines, setRoutines] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
     const [routineToDelete, setRoutineToDelete] = useState(null);
+    const { get, del, loading, error } = useApi();
 
     const fetchRoutines = useCallback(async () => {
         try {
-            const response = await axios.get(`${config.apiUrl}/api/routines/`);
-            setRoutines(response.data);
+            const data = await get('/api/routines/');
+            setRoutines(data);
         } catch (error) {
-            console.error('Error fetching routines:', error);
             showModal('Error', 'Failed to fetch routines. Please try again.');
         }
-    }, []);
+    }, [get]);
 
     useEffect(() => {
         fetchRoutines();
@@ -28,8 +27,7 @@ const RoutineList = () => {
 
     const exportRoutine = async (routine) => {
         try {
-            const response = await axios.get(`${config.apiUrl}/api/routines/${routine.id}/export/`);
-            const exportData = response.data;
+            const exportData = await get(`/api/routines/${routine.id}/export/`);
 
             // Format the data for RL Training Timer
             const formattedData = {
@@ -74,7 +72,6 @@ const RoutineList = () => {
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
         } catch (error) {
-            console.error('Error exporting routine:', error);
             showModal('Error', 'Failed to export routine. Please try again.');
         }
     };
@@ -87,11 +84,10 @@ const RoutineList = () => {
     const deleteRoutine = async () => {
         if (routineToDelete) {
             try {
-                await axios.delete(`${config.apiUrl}/api/routines/${routineToDelete.id}/delete/`);
+                await del(`/api/routines/${routineToDelete.id}/delete/`);
                 showModal('Success', 'Routine deleted successfully');
                 fetchRoutines(); // Refresh the list
             } catch (error) {
-                console.error('Error deleting routine:', error);
                 showModal('Error', 'Failed to delete routine. Please try again.');
             }
             setRoutineToDelete(null);
@@ -109,6 +105,9 @@ const RoutineList = () => {
             deleteRoutine();
         }
     };
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
 
     return (
         <div className="container mx-auto px-4 py-8">
