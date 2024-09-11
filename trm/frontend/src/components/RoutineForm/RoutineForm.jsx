@@ -31,7 +31,23 @@ const RoutineForm = ({ initialRoutine, onSubmit, submitButtonText, serverErrors 
     const handleRoutineChange = (e) => {
         setRoutine({ ...routine, [e.target.name]: e.target.value });
         // Clear the error for this field when it's changed
-        setFormErrors((prev) => ({ ...prev, [e.target.name]: null }));
+        setFormErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors[e.target.name];
+            return newErrors;
+        });
+    };
+
+    const validateForm = () => {
+        const errors = {};
+        if (!routine.name.trim()) {
+            errors.name = 'Routine name is required';
+        }
+        if (routine.entries.length === 0) {
+            errors.entries = 'At least one entry is required';
+        }
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
     };
 
     const addEntry = (newEntry) => {
@@ -68,18 +84,6 @@ const RoutineForm = ({ initialRoutine, onSubmit, submitButtonText, serverErrors 
         setIsModalOpen(true);
     };
 
-    const validateForm = () => {
-        const errors = {};
-        if (!routine.name.trim()) {
-            errors.name = 'Routine name is required';
-        }
-        if (routine.entries.length === 0) {
-            errors.entries = 'At least one entry is required';
-        }
-        setFormErrors(errors);
-        return Object.keys(errors).length === 0;
-    };
-
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!validateForm()) {
@@ -107,7 +111,7 @@ const RoutineForm = ({ initialRoutine, onSubmit, submitButtonText, serverErrors 
     return (
         <ErrorBoundary>
             <form onSubmit={handleSubmit}>
-                {(Object.keys(formErrors).length > 0 || serverErrors) && (
+                {(Object.keys(formErrors).length > 0 || (serverErrors && Object.keys(serverErrors).length > 0)) && (
                     <div
                         className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
                         role="alert"
@@ -118,7 +122,8 @@ const RoutineForm = ({ initialRoutine, onSubmit, submitButtonText, serverErrors 
                             {Object.entries(formErrors).map(([key, value]) => (
                                 <li key={key}>{value}</li>
                             ))}
-                            {serverErrors && <li>{serverErrors}</li>}
+                            {serverErrors &&
+                                Object.entries(serverErrors).map(([key, value]) => <li key={key}>{value}</li>)}
                         </ul>
                     </div>
                 )}
