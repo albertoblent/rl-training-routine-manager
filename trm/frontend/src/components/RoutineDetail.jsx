@@ -1,9 +1,11 @@
 // src/components/RoutineDetail.jsx
 import React, { useState, useEffect } from 'react';
-import { Download, Trash2, Edit2, ArrowLeft, Clock, Package, Map, Copy } from 'lucide-react';
+import { Download, Trash2, Edit2, ArrowLeft, Clock, Package, Map, Copy, AlertTriangle } from 'lucide-react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import useApi from '../hooks/useApi';
 import Modal from './Modal';
+import ErrorBoundary from './common/ErrorBoundary';
+import Loading from './common/Loading';
 
 // Custom hook for fetching routine
 const useFetchRoutine = (id) => {
@@ -130,124 +132,141 @@ const RoutineDetail = () => {
     };
 
     if (loading) {
+        return <Loading />;
+    }
+
+    if (error) {
         return (
-            <div className="flex justify-center items-center h-screen">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+            <div
+                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative flex items-center"
+                role="alert"
+            >
+                <AlertTriangle className="mr-2 h-5 w-5" />
+                <span>
+                    <strong className="font-bold">Error: </strong>
+                    <span className="block sm:inline">{error}</span>
+                </span>
             </div>
         );
     }
 
-    if (error) {
-        return <div className="text-red-500">Error: {error}</div>;
-    }
-
     if (!routine && id !== 'create') {
-        return <div className="text-red-500">Routine not found</div>;
+        return (
+            <div
+                className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative flex items-center"
+                role="alert"
+            >
+                <AlertTriangle className="mr-2 h-5 w-5" />
+                <span>Routine not found</span>
+            </div>
+        );
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <Link to="/" className="inline-flex items-center text-blue-500 hover:underline mb-6">
-                <ArrowLeft className="mr-2" size={20} />
-                Back to Routine List
-            </Link>
+        <ErrorBoundary>
+            <div className="container mx-auto px-4 py-8">
+                <Link to="/" className="inline-flex items-center text-blue-500 hover:underline mb-6">
+                    <ArrowLeft className="mr-2" size={20} />
+                    Back to Routine List
+                </Link>
 
-            <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-                <h1 className="text-3xl font-bold mb-4">{routine.name}</h1>
-                <p className="text-gray-600 mb-4 flex items-center">
-                    <Clock className="mr-2" size={20} />
-                    Total Duration: {Math.round(routine.duration / 60000)} minutes
-                </p>
+                <div className="bg-white shadow-md rounded-lg p-6 mb-8">
+                    <h1 className="text-3xl font-bold mb-4">{routine.name}</h1>
+                    <p className="text-gray-600 mb-4 flex items-center">
+                        <Clock className="mr-2" size={20} />
+                        Total Duration: {Math.round(routine.duration / 60000)} minutes
+                    </p>
 
-                <div className="flex space-x-4 mb-6">
-                    <button
-                        onClick={exportRoutine}
-                        className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                    >
-                        <Download className="mr-2" size={20} />
-                        Export
-                    </button>
-                    <button
-                        onClick={deleteRoutine}
-                        className="flex items-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-                    >
-                        <Trash2 className="mr-2" size={20} />
-                        Delete
-                    </button>
-                    <Link
-                        to={`/routine/${id}/edit`}
-                        className="flex items-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
-                    >
-                        <Edit2 className="mr-2" size={20} />
-                        Edit
-                    </Link>
-                    <button
-                        onClick={cloneRoutine}
-                        className="flex items-center px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors"
-                    >
-                        <Copy className="mr-2" size={20} />
-                        Clone
-                    </button>
-                </div>
-            </div>
-
-            <div className="bg-white shadow-md rounded-lg p-6">
-                <h2 className="text-2xl font-semibold mb-4">Entries</h2>
-                <ul className="space-y-4">
-                    {routine.entries.map((entry, index) => (
-                        <li
-                            key={index}
-                            className="flex items-start border-b border-gray-200 pb-4 last:border-b-0 last:pb-0"
-                        >
-                            <span className="mr-4 font-semibold text-lg text-gray-500">{index + 1}.</span>
-                            <div className="flex-grow">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <h3 className="text-lg font-medium">{entry.name}</h3>
-                                        <p className="text-gray-600 flex items-center mt-1">
-                                            <Clock className="mr-2" size={16} />
-                                            {Math.round(entry.duration / 60000)} minutes
-                                        </p>
-                                    </div>
-                                    {entry.entry_type === 2 && (
-                                        <div className="flex items-center text-blue-500">
-                                            <Package className="mr-2" size={16} />
-                                            Pack: {entry.training_pack_code}
-                                        </div>
-                                    )}
-                                    {entry.entry_type === 3 && (
-                                        <div className="flex items-center text-green-500">
-                                            <Map className="mr-2" size={16} />
-                                            Map: {entry.workshop_map_id}\{entry.workshop_map_file}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-
-            <Modal isOpen={isModalOpen} onClose={handleModalClose} title={modalContent.title}>
-                <p>{modalContent.message}</p>
-                <div className="mt-4 flex justify-end space-x-2">
-                    {modalContent.isConfirmation && (
+                    <div className="flex space-x-4 mb-6">
                         <button
-                            onClick={() => setIsModalOpen(false)}
-                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                            onClick={exportRoutine}
+                            className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
                         >
-                            Cancel
+                            <Download className="mr-2" size={20} />
+                            Export
                         </button>
-                    )}
-                    <button
-                        onClick={modalContent.isConfirmation ? confirmDelete : handleModalClose}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                    >
-                        {modalContent.isConfirmation ? 'Confirm' : 'OK'}
-                    </button>
+                        <button
+                            onClick={deleteRoutine}
+                            className="flex items-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                        >
+                            <Trash2 className="mr-2" size={20} />
+                            Delete
+                        </button>
+                        <Link
+                            to={`/routine/${id}/edit`}
+                            className="flex items-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                        >
+                            <Edit2 className="mr-2" size={20} />
+                            Edit
+                        </Link>
+                        <button
+                            onClick={cloneRoutine}
+                            className="flex items-center px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors"
+                        >
+                            <Copy className="mr-2" size={20} />
+                            Clone
+                        </button>
+                    </div>
                 </div>
-            </Modal>
-        </div>
+
+                <div className="bg-white shadow-md rounded-lg p-6">
+                    <h2 className="text-2xl font-semibold mb-4">Entries</h2>
+                    <ul className="space-y-4">
+                        {routine.entries.map((entry, index) => (
+                            <li
+                                key={index}
+                                className="flex items-start border-b border-gray-200 pb-4 last:border-b-0 last:pb-0"
+                            >
+                                <span className="mr-4 font-semibold text-lg text-gray-500">{index + 1}.</span>
+                                <div className="flex-grow">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h3 className="text-lg font-medium">{entry.name}</h3>
+                                            <p className="text-gray-600 flex items-center mt-1">
+                                                <Clock className="mr-2" size={16} />
+                                                {Math.round(entry.duration / 60000)} minutes
+                                            </p>
+                                        </div>
+                                        {entry.entry_type === 2 && (
+                                            <div className="flex items-center text-blue-500">
+                                                <Package className="mr-2" size={16} />
+                                                Pack: {entry.training_pack_code}
+                                            </div>
+                                        )}
+                                        {entry.entry_type === 3 && (
+                                            <div className="flex items-center text-green-500">
+                                                <Map className="mr-2" size={16} />
+                                                Map: {entry.workshop_map_id}\{entry.workshop_map_file}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                <Modal isOpen={isModalOpen} onClose={handleModalClose} title={modalContent.title}>
+                    <p>{modalContent.message}</p>
+                    <div className="mt-4 flex justify-end space-x-2">
+                        {modalContent.isConfirmation && (
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                        )}
+                        <button
+                            onClick={modalContent.isConfirmation ? confirmDelete : handleModalClose}
+                            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                        >
+                            {modalContent.isConfirmation ? 'Confirm' : 'OK'}
+                        </button>
+                    </div>
+                </Modal>
+            </div>
+        </ErrorBoundary>
     );
 };
 

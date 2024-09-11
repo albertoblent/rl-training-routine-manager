@@ -20,7 +20,7 @@ const useApi = () => {
             setLoading(false);
             return response.data;
         } catch (err) {
-            setError(err.response?.data?.message || 'An error occurred');
+            setError(err.response?.data?.message || 'An unknown error occurred');
             setLoading(false);
             throw err;
         }
