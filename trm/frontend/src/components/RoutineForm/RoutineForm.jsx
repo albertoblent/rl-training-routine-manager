@@ -8,6 +8,7 @@ const RoutineForm = ({ initialRoutine, onSubmit, submitButtonText, serverErrors 
     const [routine, setRoutine] = useState(initialRoutine);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
     useEffect(() => {
         const totalDuration = routine.entries.reduce((sum, entry) => sum + entry.duration, 0);
@@ -33,7 +34,6 @@ const RoutineForm = ({ initialRoutine, onSubmit, submitButtonText, serverErrors 
 
     const removeEntry = (index) => {
         const updatedEntries = routine.entries.filter((_, i) => i !== index);
-        // Update order for remaining entries
         const reorderedEntries = updatedEntries.map((entry, i) => ({ ...entry, order: i }));
         setRoutine({ ...routine, entries: reorderedEntries });
     };
@@ -43,7 +43,6 @@ const RoutineForm = ({ initialRoutine, onSubmit, submitButtonText, serverErrors 
             const updatedEntries = Array.from(prev.entries);
             const [reorderedItem] = updatedEntries.splice(oldIndex, 1);
             updatedEntries.splice(newIndex, 0, reorderedItem);
-            // Update order for all entries
             const reorderedEntries = updatedEntries.map((entry, i) => ({ ...entry, order: i }));
             return { ...prev, entries: reorderedEntries };
         });
@@ -56,9 +55,23 @@ const RoutineForm = ({ initialRoutine, onSubmit, submitButtonText, serverErrors 
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Ensure entries are sorted by order before submitting
+        if (hasUnsavedChanges) {
+            showModal(
+                'Unsaved Changes',
+                'You have unsaved changes in your entries. Do you want to continue without saving?'
+            );
+        } else {
+            submitRoutine();
+        }
+    };
+
+    const submitRoutine = () => {
         const sortedEntries = [...routine.entries].sort((a, b) => a.order - b.order);
         onSubmit({ ...routine, entries: sortedEntries });
+    };
+
+    const handleUnsavedChanges = (hasChanges) => {
+        setHasUnsavedChanges(hasChanges);
     };
 
     return (
@@ -71,6 +84,7 @@ const RoutineForm = ({ initialRoutine, onSubmit, submitButtonText, serverErrors 
                 removeEntry={removeEntry}
                 reorderEntries={reorderEntries}
                 serverErrors={serverErrors}
+                onUnsavedChanges={handleUnsavedChanges}
             />
             <div className="flex justify-between items-center">
                 <button
@@ -82,12 +96,23 @@ const RoutineForm = ({ initialRoutine, onSubmit, submitButtonText, serverErrors 
             </div>
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalContent.title}>
                 <p>{modalContent.message}</p>
-                <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                >
-                    OK
-                </button>
+                <div className="mt-4 flex justify-end space-x-2">
+                    <button
+                        onClick={() => {
+                            setIsModalOpen(false);
+                            submitRoutine();
+                        }}
+                        className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                    >
+                        Continue Without Saving
+                    </button>
+                    <button
+                        onClick={() => setIsModalOpen(false)}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                    >
+                        Go Back
+                    </button>
+                </div>
             </Modal>
         </form>
     );

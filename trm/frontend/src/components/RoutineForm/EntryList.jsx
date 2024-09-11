@@ -1,5 +1,5 @@
 // src/components/RoutineForm/EntryList.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import {
     SortableContext,
@@ -173,11 +173,12 @@ const SortableItem = ({
     );
 };
 
-const EntryList = ({ entries, updateEntry, removeEntry, reorderEntries, serverErrors }) => {
+const EntryList = ({ entries, updateEntry, removeEntry, reorderEntries, serverErrors, onUnsavedChanges }) => {
     const [editingEntry, setEditingEntry] = useState(null);
     const [trainingPackError, setTrainingPackError] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -185,6 +186,10 @@ const EntryList = ({ entries, updateEntry, removeEntry, reorderEntries, serverEr
             coordinateGetter: sortableKeyboardCoordinates,
         })
     );
+
+    useEffect(() => {
+        onUnsavedChanges(hasUnsavedChanges);
+    }, [hasUnsavedChanges, onUnsavedChanges]);
 
     const handleDragEnd = (event) => {
         const { active, over } = event;
@@ -211,6 +216,7 @@ const EntryList = ({ entries, updateEntry, removeEntry, reorderEntries, serverEr
         }
 
         setEditingEntry({ ...editingEntry, [name]: processedValue });
+        setHasUnsavedChanges(true);
     };
 
     const startEditingEntry = (entry, index) => {
@@ -218,11 +224,13 @@ const EntryList = ({ entries, updateEntry, removeEntry, reorderEntries, serverEr
         if (entry.entry_type === 2) {
             setTrainingPackError(validateTrainingPackCode(entry.training_pack_code));
         }
+        setHasUnsavedChanges(true);
     };
 
     const cancelEditingEntry = () => {
         setEditingEntry(null);
         setTrainingPackError('');
+        setHasUnsavedChanges(false);
     };
 
     const saveEditingEntry = () => {
@@ -237,6 +245,7 @@ const EntryList = ({ entries, updateEntry, removeEntry, reorderEntries, serverEr
         updateEntry(editingEntry, editingEntry.index);
         setEditingEntry(null);
         setTrainingPackError('');
+        setHasUnsavedChanges(false);
     };
 
     return (
