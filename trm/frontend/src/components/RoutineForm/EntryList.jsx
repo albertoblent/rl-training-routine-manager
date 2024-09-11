@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import {
-    arrayMove,
     SortableContext,
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
@@ -11,6 +10,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { AlertCircle, Clock, Edit, Trash2, Save, X, GripVertical } from 'lucide-react';
 import { validateTrainingPackCode } from './utils';
+import Modal from '../Modal';
 
 const SortableItem = ({
     entry,
@@ -172,9 +172,12 @@ const SortableItem = ({
         </li>
     );
 };
+
 const EntryList = ({ entries, updateEntry, removeEntry, reorderEntries, serverErrors }) => {
     const [editingEntry, setEditingEntry] = useState(null);
     const [trainingPackError, setTrainingPackError] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -224,7 +227,11 @@ const EntryList = ({ entries, updateEntry, removeEntry, reorderEntries, serverEr
 
     const saveEditingEntry = () => {
         if (editingEntry.entry_type === 2 && trainingPackError) {
-            // You might want to show a modal here
+            setModalContent({
+                title: 'Invalid Training Pack Code',
+                message: 'Please enter a valid training pack code before saving.',
+            });
+            setIsModalOpen(true);
             return;
         }
         updateEntry(editingEntry, editingEntry.index);
@@ -256,6 +263,25 @@ const EntryList = ({ entries, updateEntry, removeEntry, reorderEntries, serverEr
                     </ul>
                 </SortableContext>
             </DndContext>
+            {entries.length === 0 && (
+                <p className="text-gray-500 text-center mt-4">No entries yet. Add some entries to your routine!</p>
+            )}
+            {serverErrors && serverErrors.entries && (
+                <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {Object.values(serverErrors.entries).map((error, index) => (
+                        <p key={index}>{error}</p>
+                    ))}
+                </div>
+            )}
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalContent.title}>
+                <p>{modalContent.message}</p>
+                <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                >
+                    OK
+                </button>
+            </Modal>
         </div>
     );
 };
