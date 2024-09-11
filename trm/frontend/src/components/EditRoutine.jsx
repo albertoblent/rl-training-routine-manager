@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, AlertTriangle } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { AlertTriangle } from 'lucide-react';
 import useApi from '../hooks/useApi';
 import RoutineForm from './RoutineForm/RoutineForm';
 import ErrorBoundary from './common/ErrorBoundary';
@@ -57,10 +57,6 @@ const EditRoutine = () => {
     return (
         <ErrorBoundary>
             <div className="container mx-auto px-4 py-8">
-                <Link to="/" className="inline-flex items-center text-blue-500 hover:underline mb-6">
-                    <ArrowLeft className="mr-2" size={20} />
-                    Back to Routine List
-                </Link>
                 {updateError && (
                     <div
                         className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative flex items-center mb-4"

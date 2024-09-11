@@ -1,6 +1,6 @@
 // src/components/RoutineDetail.jsx
 import React, { useState, useEffect } from 'react';
-import { Download, Trash2, Edit2, ArrowLeft, Clock, Package, Map, Copy, AlertTriangle } from 'lucide-react';
+import { Download, Trash2, Edit2, Clock, Package, Map, Copy, AlertTriangle } from 'lucide-react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import useApi from '../hooks/useApi';
 import Modal from './Modal';
@@ -165,11 +165,6 @@ const RoutineDetail = () => {
     return (
         <ErrorBoundary>
             <div className="container mx-auto px-4 py-8">
-                <Link to="/" className="inline-flex items-center text-blue-500 hover:underline mb-6">
-                    <ArrowLeft className="mr-2" size={20} />
-                    Back to Routine List
-                </Link>
-
                 <div className="bg-white shadow-md rounded-lg p-6 mb-8">
                     <h1 className="text-3xl font-bold mb-4">{routine.name}</h1>
                     <p className="text-gray-600 mb-4 flex items-center">
