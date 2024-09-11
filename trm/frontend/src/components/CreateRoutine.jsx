@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AlertTriangle } from 'lucide-react';
 import useApi from '../hooks/useApi';
 import RoutineForm from './RoutineForm/RoutineForm';
@@ -8,8 +8,17 @@ import Loading from './common/Loading';
 
 const CreateRoutine = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { post, loading, error } = useApi();
     const [createError, setCreateError] = useState(null);
+
+    const clonedRoutine = location.state?.clonedRoutine;
+    const initialRoutine = clonedRoutine
+        ? {
+              ...clonedRoutine,
+              entries: Array.isArray(clonedRoutine.entries) ? clonedRoutine.entries : [],
+          }
+        : { name: '', duration: 0, entries: [] };
 
     const handleSubmit = async (routine) => {
         try {
@@ -42,7 +51,7 @@ const CreateRoutine = () => {
                 )}
 
                 <RoutineForm
-                    initialRoutine={{ name: '', duration: 0, entries: [] }}
+                    initialRoutine={initialRoutine}
                     onSubmit={handleSubmit}
                     submitButtonText="Create Routine"
                 />

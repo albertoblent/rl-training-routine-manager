@@ -112,7 +112,7 @@ const RoutineDetail = () => {
             id: null,
             entries: routine.entries.map((entry) => ({
                 ...entry,
-                id: null,
+                id: `cloned-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             })),
         };
         navigate('/routine/create', { state: { clonedRoutine } });

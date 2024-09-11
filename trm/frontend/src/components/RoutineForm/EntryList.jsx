@@ -187,6 +187,14 @@ const EntryList = ({ entries, updateEntry, removeEntry, reorderEntries, serverEr
         })
     );
 
+    const safeEntries = Array.isArray(entries) ? entries : [];
+
+    // Ensure all entries have a valid ID
+    const entriesWithIds = safeEntries.map((entry, index) => ({
+        ...entry,
+        id: entry.id || `temp-id-${index}`,
+    }));
+
     useEffect(() => {
         onUnsavedChanges(hasUnsavedChanges);
     }, [hasUnsavedChanges, onUnsavedChanges]);
@@ -195,8 +203,8 @@ const EntryList = ({ entries, updateEntry, removeEntry, reorderEntries, serverEr
         const { active, over } = event;
 
         if (active.id !== over.id) {
-            const oldIndex = entries.findIndex((entry) => entry.id === active.id);
-            const newIndex = entries.findIndex((entry) => entry.id === over.id);
+            const oldIndex = entriesWithIds.findIndex((entry) => entry.id === active.id);
+            const newIndex = entriesWithIds.findIndex((entry) => entry.id === over.id);
             reorderEntries(oldIndex, newIndex);
         }
     };
@@ -252,9 +260,9 @@ const EntryList = ({ entries, updateEntry, removeEntry, reorderEntries, serverEr
         <div className="bg-white shadow-md rounded-lg p-6 mb-8">
             <h2 className="text-2xl font-semibold mb-4">Entries</h2>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={entries.map((entry) => entry.id)} strategy={verticalListSortingStrategy}>
+                <SortableContext items={entriesWithIds.map((entry) => entry.id)} strategy={verticalListSortingStrategy}>
                     <ul className="space-y-4">
-                        {entries.map((entry, index) => (
+                        {entriesWithIds.map((entry, index) => (
                             <SortableItem
                                 key={entry.id}
                                 entry={entry}
@@ -272,7 +280,7 @@ const EntryList = ({ entries, updateEntry, removeEntry, reorderEntries, serverEr
                     </ul>
                 </SortableContext>
             </DndContext>
-            {entries.length === 0 && (
+            {entriesWithIds.length === 0 && (
                 <p className="text-gray-500 text-center mt-4">No entries yet. Add some entries to your routine!</p>
             )}
             {serverErrors && serverErrors.entries && (

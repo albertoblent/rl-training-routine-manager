@@ -7,7 +7,10 @@ import Modal from '../Modal';
 import ErrorBoundary from '../common/ErrorBoundary';
 
 const RoutineForm = ({ initialRoutine, onSubmit, submitButtonText, serverErrors }) => {
-    const [routine, setRoutine] = useState(initialRoutine);
+    const [routine, setRoutine] = useState({
+        ...initialRoutine,
+        entries: Array.isArray(initialRoutine.entries) ? initialRoutine.entries : [],
+    });
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -17,6 +20,13 @@ const RoutineForm = ({ initialRoutine, onSubmit, submitButtonText, serverErrors 
         const totalDuration = routine.entries.reduce((sum, entry) => sum + entry.duration, 0);
         setRoutine((prev) => ({ ...prev, duration: totalDuration }));
     }, [routine.entries]);
+
+    useEffect(() => {
+        setRoutine({
+            ...initialRoutine,
+            entries: Array.isArray(initialRoutine.entries) ? initialRoutine.entries : [],
+        });
+    }, [initialRoutine]);
 
     const handleRoutineChange = (e) => {
         setRoutine({ ...routine, [e.target.name]: e.target.value });
