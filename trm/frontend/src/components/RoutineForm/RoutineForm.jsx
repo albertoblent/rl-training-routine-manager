@@ -1,4 +1,3 @@
-// src/components/RoutineForm/RoutineForm.jsx
 import React, { useState, useEffect } from 'react';
 import RoutineHeader from './RoutineHeader';
 import EntryForm from './EntryForm';
@@ -22,7 +21,7 @@ const RoutineForm = ({ initialRoutine, onSubmit, submitButtonText, serverErrors 
     const addEntry = (newEntry) => {
         setRoutine({
             ...routine,
-            entries: [...routine.entries, { ...newEntry, order: routine.entries.length }],
+            entries: [...routine.entries, { ...newEntry, id: Date.now(), order: routine.entries.length }],
         });
     };
 
@@ -34,7 +33,20 @@ const RoutineForm = ({ initialRoutine, onSubmit, submitButtonText, serverErrors 
 
     const removeEntry = (index) => {
         const updatedEntries = routine.entries.filter((_, i) => i !== index);
-        setRoutine({ ...routine, entries: updatedEntries });
+        // Update order for remaining entries
+        const reorderedEntries = updatedEntries.map((entry, i) => ({ ...entry, order: i }));
+        setRoutine({ ...routine, entries: reorderedEntries });
+    };
+
+    const reorderEntries = (oldIndex, newIndex) => {
+        setRoutine((prev) => {
+            const updatedEntries = Array.from(prev.entries);
+            const [reorderedItem] = updatedEntries.splice(oldIndex, 1);
+            updatedEntries.splice(newIndex, 0, reorderedItem);
+            // Update order for all entries
+            const reorderedEntries = updatedEntries.map((entry, i) => ({ ...entry, order: i }));
+            return { ...prev, entries: reorderedEntries };
+        });
     };
 
     const showModal = (title, message) => {
@@ -44,7 +56,9 @@ const RoutineForm = ({ initialRoutine, onSubmit, submitButtonText, serverErrors 
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit(routine);
+        // Ensure entries are sorted by order before submitting
+        const sortedEntries = [...routine.entries].sort((a, b) => a.order - b.order);
+        onSubmit({ ...routine, entries: sortedEntries });
     };
 
     return (
@@ -55,6 +69,7 @@ const RoutineForm = ({ initialRoutine, onSubmit, submitButtonText, serverErrors 
                 entries={routine.entries}
                 updateEntry={updateEntry}
                 removeEntry={removeEntry}
+                reorderEntries={reorderEntries}
                 serverErrors={serverErrors}
             />
             <div className="flex justify-between items-center">

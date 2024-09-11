@@ -195,27 +195,33 @@ const RoutineDetail = () => {
                 <h2 className="text-2xl font-semibold mb-4">Entries</h2>
                 <ul className="space-y-4">
                     {routine.entries.map((entry, index) => (
-                        <li key={index} className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <h3 className="text-lg font-medium">{entry.name}</h3>
-                                    <p className="text-gray-600 flex items-center mt-1">
-                                        <Clock className="mr-2" size={16} />
-                                        {Math.round(entry.duration / 60000)} minutes
-                                    </p>
+                        <li
+                            key={index}
+                            className="flex items-start border-b border-gray-200 pb-4 last:border-b-0 last:pb-0"
+                        >
+                            <span className="mr-4 font-semibold text-lg text-gray-500">{index + 1}.</span>
+                            <div className="flex-grow">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <h3 className="text-lg font-medium">{entry.name}</h3>
+                                        <p className="text-gray-600 flex items-center mt-1">
+                                            <Clock className="mr-2" size={16} />
+                                            {Math.round(entry.duration / 60000)} minutes
+                                        </p>
+                                    </div>
+                                    {entry.entry_type === 2 && (
+                                        <div className="flex items-center text-blue-500">
+                                            <Package className="mr-2" size={16} />
+                                            Pack: {entry.training_pack_code}
+                                        </div>
+                                    )}
+                                    {entry.entry_type === 3 && (
+                                        <div className="flex items-center text-green-500">
+                                            <Map className="mr-2" size={16} />
+                                            Map: {entry.workshop_map_id}\{entry.workshop_map_file}
+                                        </div>
+                                    )}
                                 </div>
-                                {entry.entry_type === 2 && (
-                                    <div className="flex items-center text-blue-500">
-                                        <Package className="mr-2" size={16} />
-                                        Pack: {entry.training_pack_code}
-                                    </div>
-                                )}
-                                {entry.entry_type === 3 && (
-                                    <div className="flex items-center text-green-500">
-                                        <Map className="mr-2" size={16} />
-                                        Map: {entry.workshop_map_id}\{entry.workshop_map_file}
-                                    </div>
-                                )}
                             </div>
                         </li>
                     ))}
