@@ -85,8 +85,9 @@ const RoutineList = () => {
         if (routineToDelete) {
             try {
                 await del(`/api/routines/${routineToDelete.id}/delete/`);
+                // Update the local state immediately
+                setRoutines((prevRoutines) => prevRoutines.filter((routine) => routine.id !== routineToDelete.id));
                 showModal('Success', 'Routine deleted successfully');
-                fetchRoutines(); // Refresh the list
             } catch (error) {
                 showModal('Error', 'Failed to delete routine. Please try again.');
             }
@@ -100,9 +101,10 @@ const RoutineList = () => {
     };
 
     const handleModalClose = () => {
-        setIsModalOpen(false);
         if (modalContent.isConfirmation) {
             deleteRoutine();
+        } else {
+            setIsModalOpen(false);
         }
     };
 
@@ -160,7 +162,7 @@ const RoutineList = () => {
                     </li>
                 ))}
             </ul>
-            <Modal isOpen={isModalOpen} onClose={handleModalClose} title={modalContent.title}>
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalContent.title}>
                 <p>{modalContent.message}</p>
                 <div className="mt-4 flex justify-end space-x-2">
                     {modalContent.isConfirmation && (
