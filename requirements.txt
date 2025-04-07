@@ -1,0 +1,32 @@
+# Django and REST framework
+Django==5.1.1
+djangorestframework
+django-cors-headers
+
+# Database
+dj-database-url
+psycopg2-binary
+sqlparse
+
+# Web server and ASGI
+gunicorn
+uvicorn
+h11
+whitenoise
+Brotli
+# # HTTP and utilities
+# requests
+# certifi==2024.8.30
+# charset-normalizer==3.3.2
+# idna==3.8
+# urllib3==2.2.2
+
+# Development tools
+black
+flake8
+isort
+mypy-extensions
+pycodestyle
+pyflakes
+mccabe
+
