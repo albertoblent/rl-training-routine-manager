@@ -13,6 +13,8 @@ services:
         fromDatabase:
           name: trm-db
           property: connectionString
+    dependsOn:
+      - trm-db
 
   - type: postgresql
     name: trm-db
