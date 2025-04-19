@@ -12,6 +12,11 @@ DEBUG = "RENDER" not in os.environ
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
+# Add frontend build directory to static files dirs
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "frontend", "build", "static"),
+]
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",
@@ -97,7 +102,7 @@ ROOT_URLCONF = "trm.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, 'frontend', 'build')],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

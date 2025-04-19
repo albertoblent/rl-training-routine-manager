@@ -7,7 +7,7 @@ set -o errexit
 PROJECT_ROOT=$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")
 cd "$PROJECT_ROOT"
 
-echo "=== Starting RL Training Routine Manager with Docker ==="
+echo "=== Building RL Training Routine Manager Docker image ==="
 
 # Check if Docker is installed
 if ! command -v docker &> /dev/null; then
@@ -27,19 +27,9 @@ if ! command -v docker-compose &> /dev/null; then
     exit 1
 fi
 
-# Create logs directory if it doesn't exist
-LOGS_DIR="$PROJECT_ROOT/local-dev/logs"
-if [ ! -d "$LOGS_DIR" ]; then
-  mkdir -p "$LOGS_DIR"
-  echo "Created logs directory: $LOGS_DIR"
-fi
+# Build the Docker images without starting the containers
+echo "Building Docker images..."
+docker-compose build
 
-# Start services with docker-compose (without rebuilding)
-echo "Starting services with docker-compose..."
-docker-compose up
-
-echo "=== Docker containers are now running ==="
-echo "Django backend: http://localhost:8000"
-echo "React frontend: http://localhost:3000"
-echo ""
-echo "To stop the containers, press Ctrl+C or run: docker-compose down"
+echo "=== Docker images built successfully ==="
+echo "Run ./local-dev/docker-start.sh to start the containers"
