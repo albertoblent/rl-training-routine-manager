@@ -175,31 +175,31 @@ const RoutineDetail = () => {
                     <div className="flex space-x-4 mb-6">
                         <button
                             onClick={exportRoutine}
-                            className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                            className="flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
                         >
-                            <Download className="mr-2" size={20} />
-                            Export
+                            <Download className="mobile:mr-2" size={20} />
+                            <span className="hidden mobile:inline">Export</span>
                         </button>
                         <button
                             onClick={deleteRoutine}
-                            className="flex items-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                            className="flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
                         >
-                            <Trash2 className="mr-2" size={20} />
-                            Delete
+                            <Trash2 className="mobile:mr-2" size={20} />
+                            <span className="hidden mobile:inline">Delete</span>
                         </button>
                         <Link
                             to={`/routine/${id}/edit`}
-                            className="flex items-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                            className="flex items-center justify-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
                         >
-                            <Edit2 className="mr-2" size={20} />
-                            Edit
+                            <Edit2 className="mobile:mr-2" size={20} />
+                            <span className="hidden mobile:inline">Edit</span>
                         </Link>
                         <button
                             onClick={cloneRoutine}
-                            className="flex items-center px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors"
+                            className="flex items-center justify-center px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors"
                         >
-                            <Copy className="mr-2" size={20} />
-                            Clone
+                            <Copy className="mobile:mr-2" size={20} />
+                            <span className="hidden mobile:inline">Clone</span>
                         </button>
                     </div>
                 </div>

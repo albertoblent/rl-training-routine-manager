@@ -1,9 +1,8 @@
 services:
   - type: web
     name: trm-backend
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn trm.wsgi:application
+    env: docker
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: DJANGO_SECRET_KEY
         generateValue: true
@@ -13,6 +12,8 @@ services:
         fromDatabase:
           name: trm-db
           property: connectionString
+      - key: PORT
+        value: 10000
     dependsOn:
       - trm-db
 

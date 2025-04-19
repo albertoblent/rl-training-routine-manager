@@ -22,7 +22,12 @@ if not DEBUG:
     # Enable WhiteNoise's GZip compression of static assets.
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+# Set ALLOWED_HOSTS from environment variable if present
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".onrender.com"]
+
+DJANGO_ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "")
+if DJANGO_ALLOWED_HOSTS:
+    ALLOWED_HOSTS.extend(DJANGO_ALLOWED_HOSTS.split(","))
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 if RENDER_EXTERNAL_HOSTNAME:
@@ -111,8 +116,17 @@ WSGI_APPLICATION = "trm.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-if DEBUG:
-    # Use SQLite for local development
+# Check for DATABASE_URL first (for Docker and Render)
+if os.environ.get("DATABASE_URL"):
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=os.environ.get("DATABASE_URL"),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+elif DEBUG:
+    # Use SQLite for local development without Docker
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -120,10 +134,9 @@ if DEBUG:
         }
     }
 else:
-    # For production on Render
+    # Fallback for production on Render
     DATABASES = {
         "default": dj_database_url.config(
-            default=os.environ.get("DATABASE_URL"),
             conn_max_age=600,
             conn_health_checks=True,
         )
