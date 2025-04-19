@@ -80,3 +80,7 @@ dmypy.json
 
 # db
 trm/db.sqlite3
+
+# local-dev
+local-dev/django.log
+local-dev/react.log
